@@ -7,11 +7,13 @@ import os
 import datetime
 import jwt
 import functools
+from cors_config import configure_cors
 
 # Initialize Flask app
 app = Flask(__name__)
-application = app
-CORS(app)  # Enable Cross-Origin Resource Sharing
+
+# Apply dynamic CORS configuration
+configure_cors(app)
 
 # Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
