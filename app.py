@@ -11,6 +11,7 @@ from cors_config import configure_cors
 
 # Initialize Flask app
 app = Flask(__name__)
+application = app
 
 # Apply dynamic CORS configuration
 configure_cors(app)
