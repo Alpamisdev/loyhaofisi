@@ -1,62 +1,80 @@
 from flask_cors import CORS
 import os
-import json
-
-def load_cors_config():
-    """Load CORS configuration from file or environment"""
-    config_path = os.environ.get('CORS_CONFIG_PATH', 'cors_config.json')
-    
-    try:
-        if os.path.exists(config_path):
-            with open(config_path, 'r') as f:
-                return json.load(f)
-        else:
-            # Default configuration
-            return {
-                "default": {
-                    "origins": ["http://localhost:3000"],
-                    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-                    "allow_headers": ["Content-Type", "Authorization"]
-                },
-                "public": {
-                    "origins": "*",
-                    "methods": ["GET"]
-                }
-            }
-    except Exception as e:
-        print(f"Error loading CORS configuration: {e}")
-        # Fallback to allowing localhost only
-        return {
-            "default": {
-                "origins": ["http://localhost:3000"],
-                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-                "allow_headers": ["Content-Type", "Authorization"]
-            }
-        }
 
 def configure_cors(app):
-    """Configure CORS with dynamic settings"""
-    cors_config = load_cors_config()
+    """Configure CORS settings for the application"""
+    # Get allowed origins from environment or use defaults
+    allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:3001,https://loyihaofis.uz').split(',')
     
-    # Apply public endpoints configuration
-    if "public" in cors_config:
-        public_config = cors_config["public"]
-        CORS(app, resources={
-            r"/api/blog/*": public_config,
-            r"/api/about-company/*": public_config,
-            r"/api/documents/*": public_config
-        })
+    # Configure CORS for different endpoint groups
     
-    # Apply admin endpoints configuration
-    if "admin" in cors_config:
-        admin_config = cors_config["admin"]
-        CORS(app, resources={
-            r"/api/auth/*": admin_config,
-            r"/api/admin/*": admin_config
-        })
+    # Public endpoints - less restrictive
+    CORS(app, resources={
+        r"/api/blog/*": {
+            "origins": "*",  # Allow any origin for public content
+            "methods": ["GET"],  # Only allow GET for public endpoints
+        },
+        r"/api/about-company/*": {
+            "origins": "*",
+            "methods": ["GET"],
+        },
+        r"/api/documents/*": {
+            "origins": "*",
+            "methods": ["GET"],
+        }
+    })
     
-    # Apply default configuration to all other routes
-    default_config = cors_config.get("default", {"origins": "*"})
-    CORS(app, resources={r"/api/*": default_config})
+    # Authentication endpoints - need credentials support
+    CORS(app, resources={
+        r"/api/auth/*": {
+            "origins": allowed_origins,
+            "methods": ["GET", "POST", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True  # Critical for auth requests with credentials
+        }
+    })
     
-    print(f"CORS configured with dynamic settings")
+    # Admin/protected endpoints
+    CORS(app, resources={
+        r"/api/admin/*": {
+            "origins": allowed_origins,
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        },
+        r"/api/menu/*": {
+            "origins": allowed_origins,
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        },
+        r"/api/feedback/*": {
+            "origins": allowed_origins,
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        },
+        r"/api/staff/*": {
+            "origins": allowed_origins,
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        },
+        r"/api/restore/*": {
+            "origins": allowed_origins,
+            "methods": ["POST", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        }
+    })
+    
+    # Default for any other API endpoints
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": allowed_origins,
+            "methods": ["GET", "OPTIONS"],
+            "allow_headers": ["Content-Type"]
+        }
+    })
+    
+    print(f"CORS configured with allowed origins: {allowed_origins}")

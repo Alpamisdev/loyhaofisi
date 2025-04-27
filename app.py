@@ -11,10 +11,10 @@ from cors_config import configure_cors
 
 # Initialize Flask app
 app = Flask(__name__)
-application = app
 
-# Apply dynamic CORS configuration
+# Configure CORS before any other setup
 configure_cors(app)
+application = app
 
 # Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
