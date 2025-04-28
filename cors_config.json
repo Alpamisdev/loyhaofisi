@@ -1,6 +1,6 @@
 {
     "default": {
-      "origins": ["http://localhost:3000", "http://localhost:3001", "https://api.loyihaofisi.uz/", "https://loyihaofisi.uz/"],
+      "origins": ["http://localhost:3000", "http://localhost:3001", "https://api.loyihaofisi.uz/", "https://loyihaofisi.uz/,https://loyiha-qq.netlify.app/"],
       "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       "allow_headers": ["Content-Type", "Authorization"]
     },
@@ -9,7 +9,7 @@
       "methods": ["GET"]
     },
     "admin": {
-      "origins": ["http://localhost:3000", "http://localhost:3001", "https://api.loyihaofisi.uz/", "https://loyihaofisi.uz/"],
+      "origins": ["http://localhost:3000", "http://localhost:3001", "https://api.loyihaofisi.uz/", "https://loyihaofisi.uz/,https://loyiha-qq.netlify.app/"],
       "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       "allow_headers": ["Content-Type", "Authorization"],
       "supports_credentials": true
