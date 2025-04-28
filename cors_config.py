@@ -6,7 +6,7 @@ def configure_cors(app):
     Configure CORS for the Flask application to work with .htaccess configuration
     """
     # Get allowed origins from environment or use defaults
-    allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:3001,https://loyihaofis.uz,https://loyiha-qq.netlify.app/').split(',')
+    allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:3000').split(',')
 
     
     # Configure CORS for different endpoint groups
