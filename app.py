@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, g
+from flask import Flask, jsonify, request, g, make_response
 from flask_cors import CORS
 from flasgger import Swagger
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -14,7 +14,6 @@ app = Flask(__name__)
 
 # Configure CORS before any other setup
 configure_cors(app)
-application = app
 
 # Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
@@ -85,6 +84,15 @@ def token_required(f):
         return f(current_user, *args, **kwargs)
     return decorator
 
+# Special handler for OPTIONS requests
+@app.route('/', defaults={'path': ''}, methods=['OPTIONS'])
+@app.route('/<path:path>', methods=['OPTIONS'])
+def handle_options(path):
+    """Handle preflight OPTIONS requests"""
+    response = make_response()
+    response.status_code = 200
+    return response
+
 # Routes
 @app.route('/')
 def index():
@@ -144,7 +152,7 @@ def login():
         'exp': datetime.datetime.now() + app.config['JWT_EXPIRATION_DELTA']
     }, app.config['SECRET_KEY'], algorithm="HS256")
     
-    return jsonify({
+    response = jsonify({
         'token': token,
         'user': {
             'id': user['id'],
@@ -152,6 +160,8 @@ def login():
             'role': user['role']
         }
     })
+    
+    return response
 
 @app.route('/api/auth/register', methods=['POST'])
 @token_required
@@ -273,6 +283,33 @@ def restore_item(current_user, table_name, item_id):
     db.commit()
     
     return jsonify({'message': f'Item restored in {table_name}'})
+
+# CORS test endpoint
+@app.route('/api/cors-test', methods=['GET', 'POST', 'OPTIONS'])
+def cors_test():
+    """
+    Test CORS configuration
+    ---
+    tags:
+      - Utility
+    responses:
+      200:
+        description: CORS test successful
+    """
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.status_code = 200
+        return response
+        
+    origin = request.headers.get('Origin', 'No origin header')
+    
+    return jsonify({
+        'message': 'CORS test successful',
+        'method': request.method,
+        'origin': origin,
+        'headers': dict(request.headers),
+        'timestamp': datetime.datetime.now().isoformat()
+    })
 
 # Include other route modules
 from routes.menu import register_menu_routes
