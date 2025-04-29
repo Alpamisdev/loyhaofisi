@@ -99,7 +99,8 @@ def configure_cors(app):
     CORS(app, resources={
         r"/api/*": {
             "origins": allowed_origins,
-            "methods": ["GET", "OPTIONS"]
+            "methods": ["GET", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"]
         }
     })
     
